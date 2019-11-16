@@ -1,0 +1,27 @@
+{
+  "name": "fullstackopen2019-part3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "watch": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edgarcheverier/fullstackopen2019-part3.git"
+  },
+  "author": "Edgar Cheverier",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/edgarcheverier/fullstackopen2019-part3/issues"
+  },
+  "homepage": "https://github.com/edgarcheverier/fullstackopen2019-part3#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.4"
+  }
+}
