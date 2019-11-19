@@ -53,6 +53,12 @@ app.get('/info', (request, response) => {
 
 app.post('/api/persons', (request, response) => {
   if (request.body && request.body.name && request.body.number) {
+    const noUniquePerson = persons.some(person => {
+      return person.name.toLowerCase() === request.body.name.toLowerCase();
+    });
+    if (noUniquePerson) {
+      return response.status(400).json({message: 'name must be unique'});
+    }
     const id = Math.floor(Math.random() * 10000);
     const newPerson = {
       name: request.body.name,
@@ -60,10 +66,9 @@ app.post('/api/persons', (request, response) => {
       id
     };
     persons = persons.concat(newPerson);
-    response.json(newPerson);
-  } else {
-    response.status(400).json({message: 'name or number missing'})
+    return response.json(newPerson);
   }
+  response.status(400).json({message: 'name or number missing'})
 });
 
 app.delete('/api/persons/:id', (request, response) => {
