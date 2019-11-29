@@ -9,7 +9,7 @@ const password = process.argv[2];
 
 const URL = `mongodb+srv://edgarcheverier:${password}@cluster0-5kmqs.mongodb.net/phonebook?retryWrites=true&w=majority`;
 
-mongoose.connect(URL, {useNewUrlParser: true});
+mongoose.connect(URL, {useUnifiedTopology: true, useNewUrlParser: true});
 
 const phonebookSchema = new mongoose.Schema({
   name: String,
