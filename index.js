@@ -1,8 +1,10 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const cors = require('cors');
+const Phonebook = require('./models/phonebook');
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -39,27 +41,42 @@ let persons = [
 ];
 
 app.get('/api/persons', (request, response) => {
-  response.json(persons);
+  Phonebook.find({})
+    .then(result => {
+      response.json(result)
+    })
+    .catch(error => {
+      console.log('/api/persons/:id error: ', error)
+      response.status(404).end();
+    });
 });
 
 app.get('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id);
-  const person = persons.find(ele => ele.id === id);
-  if (person) {
-    response.json(person);
-  } else {
-    response.status(404).end();
-  }
+  Phonebook.findById(request.params.id)
+    .then(result => {
+      response.json(result);
+    })
+    .catch(error => {
+      console.log('/api/persons/:id error: ', error)
+      response.status(404).end();
+    });
 });
 
 app.get('/info', (request, response) => {
   const receivedTime = new Date().toString();
-  response.send(
-    `
-     <h1>Phonebook has info for ${persons.length}</h1>
-     <h4>${receivedTime}</h4>
-    `
-  )
+  Phonebook.find({})
+    .then(result => {
+      response.send(
+        `
+         <h1>Phonebook has info for ${result.length}</h1>
+         <h4>${receivedTime}</h4>
+        `
+      )
+    })
+    .catch(error => {
+      console.log('/api/persons/:id error: ', error)
+      response.status(404).end();
+    });
 });
 
 app.post('/api/persons', (request, response) => {
@@ -88,7 +105,7 @@ app.delete('/api/persons/:id', (request, response) => {
   response.status(204).end();
 });
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
