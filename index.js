@@ -23,21 +23,22 @@ app.get('/api/persons', (request, response) => {
       response.json(result)
     })
     .catch(error => {
-      console.log('/api/persons/:id error: ', error)
-      response.status(404).end();
+      console.log('Get all persons error DB: ', error)
+      response.status(500).end();
     });
 });
 
-app.get('/api/persons/:id', (request, response) => {
-  Phonebook.findById(request.params.id)
+app.get('/api/persons/:id', (request, response, next) => {
+  if (request.params.id) {
+    Phonebook.findById(request.params.id)
     .then(result => {
       if (result) return response.json(result);
       response.status(404).end();
     })
-    .catch(error => {
-      console.log('get person by id error: ', error)
-      response.status(400).json({message: 'malformatted id'});
-    });
+    .catch(error => next(error));
+  } else {
+    response.status(400).json({message: 'id missing'});
+  }
 });
 
 app.get('/info', (request, response) => {
@@ -52,8 +53,8 @@ app.get('/info', (request, response) => {
       )
     })
     .catch(error => {
-      console.log('/api/persons/:id error: ', error)
-      response.status(404).end();
+      console.log('Get total persons error DB:', error)
+      response.status(500).end();
     });
 });
 
@@ -80,20 +81,29 @@ app.post('/api/persons', (request, response) => {
   }
 });
 
-app.delete('/api/persons/:id', (request, response) => {
+app.delete('/api/persons/:id', (request, response, next) => {
   if (request.params.id) {
     Phonebook.findByIdAndDelete(request.params.id)
-      .then(result => {
+      .then(() => {
         response.status(204).end();
       })
-      .catch(error => {
-        console.log('delete person by id error: ', error)
-        response.status(404).end();
-      })
+      .catch(error => next(error));
   } else {
     response.status(400).json({message: 'id missing'})
   }
 });
+
+const errorHandler = (error, request, response, next) => {
+  console.log(error.message);
+
+  if (error.name === 'CastError' &&  error.kind === 'ObjectId') {
+    return response.status(400).json({message: 'malformatted id'});
+  }
+
+  next(error)
+}
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT
 
