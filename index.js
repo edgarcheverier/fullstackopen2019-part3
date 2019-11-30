@@ -81,22 +81,25 @@ app.get('/info', (request, response) => {
 
 app.post('/api/persons', (request, response) => {
   if (request.body && request.body.name && request.body.number) {
-    const noUniquePerson = persons.some(person => {
-      return person.name.toLowerCase() === request.body.name.toLowerCase();
-    });
-    if (noUniquePerson) {
-      return response.status(400).json({message: 'name must be unique'});
-    }
-    const id = Math.floor(Math.random() * 10000);
-    const newPerson = {
-      name: request.body.name,
-      number: request.body.number,
-      id
-    };
-    persons = persons.concat(newPerson);
-    return response.json(newPerson);
+    Phonebook.findOne({name: request.body.name, number: request.body.number})
+      .then(result => {
+        if (result) return response.status(400).json({message: 'user already exists'});
+
+        const person = new Phonebook({
+          name: request.body.name,
+          number: request.body.number
+        });
+
+        person.save()
+          .then(saveResult => {
+            response.json(saveResult)
+          })
+          .catch(() => response.status(500).json({message: 'error saving user in the DB'}));
+      })
+      .catch(() => response.status(500).json({message: 'error finding with the DB'}));
+  } else {
+    response.status(400).json({message: 'name or number missing'});
   }
-  response.status(400).json({message: 'name or number missing'})
 });
 
 app.delete('/api/persons/:id', (request, response) => {
