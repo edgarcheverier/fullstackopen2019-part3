@@ -81,6 +81,23 @@ app.post('/api/persons', (request, response) => {
   }
 });
 
+app.put('/api/persons/:id', (request, response, next) => {
+  if (request.params.id && request.body && request.body.name && request.body.number) {
+    const updatedPerson = {
+      name: request.body.name,
+      number: request.body.number
+    }
+    Phonebook.findByIdAndUpdate(request.params.id, updatedPerson, {new: true})
+      .then(result => {
+        if (result) return response.json(result)
+        response.status(404).end();
+      })
+      .catch(error => next(error));
+  } else {
+    response.status(400).json({message: 'id, name or number missing'})
+  }
+});
+
 app.delete('/api/persons/:id', (request, response, next) => {
   if (request.params.id) {
     Phonebook.findByIdAndDelete(request.params.id)
