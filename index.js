@@ -107,11 +107,10 @@ app.delete('/api/persons/:id', (request, response, next) => {
 });
 
 const errorHandler = (error, request, response, next) => {
-  console.log(error.message);
 
   if (error.name === 'CastError' &&  error.kind === 'ObjectId') {
     return response.status(400).json({message: 'malformatted id'});
-  } else if (error.errors.name.name === 'ValidatorError') {
+  } else if (error.name === 'ValidationError') {
     return response.status(400).json({message: error.message})
   }
 
