@@ -17,29 +17,6 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :r
 
 app.use(express.static('build'));
 
-let persons = [
-  {
-    name: "Arto Hellas",
-    number: "040-123456",
-    id: 1
-  },
-  {
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-    id: 2
-  },
-  {
-    name: "Dan Abramov",
-    number: "12-43-234345",
-    id: 3
-  },
-  {
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
-    id: 4
-  }
-];
-
 app.get('/api/persons', (request, response) => {
   Phonebook.find({})
     .then(result => {
@@ -54,11 +31,12 @@ app.get('/api/persons', (request, response) => {
 app.get('/api/persons/:id', (request, response) => {
   Phonebook.findById(request.params.id)
     .then(result => {
-      response.json(result);
+      if (result) return response.json(result);
+      response.status(404).end();
     })
     .catch(error => {
-      console.log('/api/persons/:id error: ', error)
-      response.status(404).end();
+      console.log('get person by id error: ', error)
+      response.status(400).json({message: 'malformatted id'});
     });
 });
 
@@ -103,9 +81,18 @@ app.post('/api/persons', (request, response) => {
 });
 
 app.delete('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id);
-  persons = persons.filter(person => person.id !== id);
-  response.status(204).end();
+  if (request.params.id) {
+    Phonebook.findByIdAndDelete(request.params.id)
+      .then(result => {
+        response.status(204).end();
+      })
+      .catch(error => {
+        console.log('delete person by id error: ', error)
+        response.status(404).end();
+      })
+  } else {
+    response.status(400).json({message: 'id missing'})
+  }
 });
 
 const PORT = process.env.PORT
